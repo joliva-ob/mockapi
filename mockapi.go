@@ -10,7 +10,10 @@ import (
     "time"
 )
 
+// Global variable to store mappings between requested endpoints and
+// its mocked response. 
 var blueprintmap map[string]string
+
 
 /**
  * Main method
@@ -26,20 +29,17 @@ func main() {
     }
 
     // Load and process the api blueprint file to get the endpoints, requests and responses
-    endpoints := blueprint.ProcessApiBlueprint( os.Args[2] )
-    blueprintmap = blueprint.LoadEndpointsMap( os.Args[2] )
+    blueprintmap = blueprint.ProcessApiBlueprint( os.Args[2] )
 
     // Create the router to handle mockup requests with its response properly
     router := mux.NewRouter().StrictSlash(true)
     router.HandleFunc("/", Index) // General welcome endpoint
 
     // Customized endpoint from blueprint file
-    for i := 0; i < len(endpoints); i++ {
-
-        fmt.Printf("Adding endpoint: %s\n", endpoints[i])
-        router.HandleFunc(endpoints[i], AddEndpoint)
+    for k := range blueprintmap {
+        fmt.Printf("Adding endpoint: %s\n", k)
+        router.HandleFunc(k, ProcessEndpoint)    
     }
-    //router.HandleFunc("/todos/{todoId}", TodoShow)
     
     // Starting server on given port number
     LogStartServer( os.Args[4] )
@@ -59,7 +59,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
  * Generic endpoint to expose resources already loaded from the given 
  * api blueprint file.
  */
-func AddEndpoint(w http.ResponseWriter, r *http.Request) {
+func ProcessEndpoint(w http.ResponseWriter, r *http.Request) {
 
     // Get the mock response from the map, if exists
     outputmock := blueprintmap[r.URL.Path]
@@ -71,6 +71,8 @@ func AddEndpoint(w http.ResponseWriter, r *http.Request) {
 
 
 /*
+//Register with: router.HandleFunc("/todos/{todoId}", TodoShow)
+//
 func TodoShow(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     todoId := vars["todoId"]
@@ -78,9 +80,11 @@ func TodoShow(w http.ResponseWriter, r *http.Request) {
 }
 */
 
+
 func LogStartServer(port string){
     fmt.Printf("Server started successfully on port %s ...\n",port)       
 }
+
 
 /**
 * Method to check the input parameters

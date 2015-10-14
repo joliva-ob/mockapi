@@ -12,9 +12,12 @@ import (
  * Load and process the api blueprint file to get the endpoints, 
  * requests and responses
  */
-func ProcessApiBlueprint(filepath string) []string {
+func ProcessApiBlueprint(filepath string) map[string]string {
 
-    endpointlist := make( []string, 0 )
+    var endpoint string
+    var sresponse string
+    isrecordingresponse := false
+    bpm := make( map[string]string )
 
     apibfile, err := os.Open( filepath )
     if err != nil {
@@ -26,25 +29,41 @@ func ProcessApiBlueprint(filepath string) []string {
     line, e := Readln(reader)
     for e == nil {
         
-        if strings.HasPrefix(line, "## ") {
+        if isrecordingresponse {
+            
+            if strings.HasPrefix(line, "+") || strings.HasPrefix(line, "#"){
+                
+                isrecordingresponse = false
+                bpm[endpoint] = sresponse // store the response to its key endpoint
+            } else {
 
-            startindex := strings.Index(line, "[")
-            endindex := strings.Index(line, "{")
-            endpointlist = append( endpointlist,line[startindex+1:endindex] )
-        }
+                sresponse += line
+            }
+        } else {
+          
+          if strings.HasPrefix(line, "## ") {
+
+              startindex := strings.Index(line, "[")
+              endindex := strings.Index(line, "{")
+              endpoint = line[startindex+1:endindex] // store the endpoint key temporally
+          } else if strings.HasPrefix(line, "+ Response 200") {
+            
+              isrecordingresponse = true
+          }
+        }  
+        
         line,e = Readln(reader)
     }
 
-    return endpointlist
+    return bpm
 }
 
 
 /**
  * Load and process the api blueprint file to get the endpoints, 
  * requests and responses
- * TODO load from the api blueprint file
  */
-func LoadEndpointsMap(filepath string) map[string]string {
+func ProcessApiBlueprintTest(filepath string) map[string]string {
 
     bpm := make( map[string]string )
 
