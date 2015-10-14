@@ -1,0 +1,13 @@
+Adding endpoint: /crm-api/v1.0/buyers
+Adding endpoint: /crm-api/v1.0/purchases
+Server started successfully on port 8000 ...
+2015-10-14 09:19:05.238174344 +0200 CEST [mockapi] Request received: /crm-api/v1.0/purchases
+2015-10-14 09:19:06.0317845 +0200 CEST [mockapi] Request received: /crm-api/v1.0/purchases
+2015-10-14 09:19:06.280897613 +0200 CEST [mockapi] Request received: /crm-api/v1.0/purchases
+2015-10-14 09:19:06.492397963 +0200 CEST [mockapi] Request received: /crm-api/v1.0/purchases
+2015-10-14 09:19:06.785632992 +0200 CEST [mockapi] Request received: /crm-api/v1.0/purchases
+2015-10-14 09:19:06.988806458 +0200 CEST [mockapi] Request received: /crm-api/v1.0/purchases
+2015-10-14 09:19:11.051365336 +0200 CEST [mockapi] Request received: /crm-api/v1.0/buyers
+2015-10-14 09:19:11.948498399 +0200 CEST [mockapi] Request received: /crm-api/v1.0/buyers
+2015-10-14 09:19:12.354216024 +0200 CEST [mockapi] Request received: /crm-api/v1.0/buyers
+2015-10-14 09:19:12.556723492 +0200 CEST [mockapi] Request received: /crm-api/v1.0/buyers

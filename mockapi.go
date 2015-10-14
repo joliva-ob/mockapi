@@ -1,66 +1,91 @@
 package main
 
 import (
-    "fmt"
     "log"
+    "fmt"
     "net/http"
     "os"
     "github.com/gorilla/mux"
-    "io/ioutil"
+    "github.com/joliva-ob/mockapi/blueprint"
+    "time"
 )
 
+var blueprintmap map[string]string
+
 /**
-* Main method
-*/
+ * Main method
+ */
 func main() {
 
     // Checking parameters
-    if( !validateParams() ){
+    if ( !ValidateParams() ){
         fmt.Printf("Invalid parameters\n -f Path to the apiblueprint file\n -p Server port\n")
         fmt.Printf("Check them and try it again.\n\nExample: go run mockapi.go -p ./myapi.apib -p 8000\n")
 
         os.Exit(3)
     }
 
-    // Loading the api blueprint file
-    file := loadBlueprintFile( os.Args[2] )
+    // Load and process the api blueprint file to get the endpoints, requests and responses
+    endpoints := blueprint.ProcessApiBlueprint( os.Args[2] )
+    blueprintmap = blueprint.LoadEndpointsMap( os.Args[2] )
 
-    // Starting the server listener to defined endpoints
-    logStartServer( os.Args[4] )
-
+    // Create the router to handle mockup requests with its response properly
     router := mux.NewRouter().StrictSlash(true)
-    router.HandleFunc("/", Index)
-    router.HandleFunc("/todos", TodoIndex)
-    router.HandleFunc("/todos/{todoId}", TodoShow)
+    router.HandleFunc("/", Index) // General welcome endpoint
+
+    // Customized endpoint from blueprint file
+    for i := 0; i < len(endpoints); i++ {
+
+        fmt.Printf("Adding endpoint: %s\n", endpoints[i])
+        router.HandleFunc(endpoints[i], AddEndpoint)
+    }
+    //router.HandleFunc("/todos/{todoId}", TodoShow)
     
-    var port string = ":"
+    // Starting server on given port number
+    LogStartServer( os.Args[4] )
+    port := ":"
     port += os.Args[4]    
-    log.Fatal(http.ListenAndServe(port, router))
+    log.Fatal( http.ListenAndServe(port, router) ) // Start the server at listening port
 }
 
 
+// Welcome endpoint
 func Index(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintln(w, "Welcome!")
+    fmt.Fprintln(w, "Welcome to mockapi, the mockup tool for api blueprint testing purposes.")
 }
 
-func TodoIndex(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintln(w, "Todo Index!")
+
+/**
+ * Generic endpoint to expose resources already loaded from the given 
+ * api blueprint file.
+ */
+func AddEndpoint(w http.ResponseWriter, r *http.Request) {
+
+    // Get the mock response from the map, if exists
+    outputmock := blueprintmap[r.URL.Path]
+    fmt.Printf("%s [mockapi] Request received: %s\n", time.Now(), r.URL.Path)
+    
+    // Response mock string
+    fmt.Fprintln(w, outputmock)
 }
 
+
+/*
 func TodoShow(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     todoId := vars["todoId"]
     fmt.Fprintln(w, "Todo show:", todoId)
 }
+*/
 
-func logStartServer(port string){
-    fmt.Printf("Server started listening port %s ...\n",port)       
+func LogStartServer(port string){
+    fmt.Printf("Server started successfully on port %s ...\n",port)       
 }
 
 /**
 * Method to check the input parameters
 */
-func validateParams() bool {
+func ValidateParams() bool {
 
     var isValid bool = true
     size := len(os.Args)
@@ -74,15 +99,3 @@ func validateParams() bool {
     return isValid
 }
 
-/**
-* Read the api blueprint file
-*/
-func loadBlueprintFile(file string) []byte{
-    // It read the whole file !
-    file, err := ioutil.ReadFile("input.txt")
-    if err != nil {
-        panic(err)
-    }
-
-    return file
-}
