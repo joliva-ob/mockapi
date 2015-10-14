@@ -12,7 +12,9 @@ import (
 
 // Global variable to store mappings between requested endpoints and
 // its mocked response. 
-var blueprintmap map[string]string
+var(
+    blueprintmap map[string]string
+)
 
 
 /**
@@ -62,8 +64,13 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func ProcessEndpoint(w http.ResponseWriter, r *http.Request) {
 
     // Get the mock response from the map, if exists
+    status := "200"
+    _, ok := blueprintmap[r.URL.Path]
+    if !ok {
+        status = "500" // General error temporally TODO: get the proper code, response from the api blueprint specification
+    }
     outputmock := blueprintmap[r.URL.Path]
-    fmt.Printf("%s [mockapi] Request received: %s\n", time.Now(), r.URL.Path)
+    fmt.Printf("%s [mockapi] Request received: %s with response status: %s \n", time.Now(), r.URL.Path, status)
     
     // Response mock string
     fmt.Fprintln(w, outputmock)

@@ -8,6 +8,11 @@ import (
     "strings"
 )
 
+const(
+  BeginEndpointStr = "## "
+)
+
+
 /**
  * Load and process the api blueprint file to get the endpoints, 
  * requests and responses
@@ -41,13 +46,13 @@ func ProcessApiBlueprint(filepath string) map[string]string {
             }
         } else {
           
-          if strings.HasPrefix(line, "## ") {
+          if strings.HasPrefix(line, BeginEndpointStr) {
 
               startindex := strings.Index(line, "[")
               endindex := strings.Index(line, "{")
               endpoint = line[startindex+1:endindex] // store the endpoint key temporally
           } else if strings.HasPrefix(line, "+ Response 200") {
-            
+
               isrecordingresponse = true
           }
         }  
